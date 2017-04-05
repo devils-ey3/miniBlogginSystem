@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block script %}
+	<script>
+		function getParameterByName(name, url) { // coppied from http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript/901144#901144
+		    if (!url) {
+		      url = window.location.href;
+		    }
+		    name = name.replace(/[\[\]]/g, "\\$&");
+		    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+		        results = regex.exec(url);
+		    if (!results) return null;
+		    if (!results[2]) return '';
+		    return decodeURIComponent(results[2].replace(/\+/g, " "));
+		}
+
+		$(document).ready(function(){
+
+		var query = getParameterByName("q");
+		var tweetList = [];
+		var nextTweetUrl, previousTweetUrl;
+
+		function updateHashLinks(){
+			$(".media-body").each(function(data){
+				var hashtagRegex = /(^|\s)#([\w\d-]+)/g;
+				var newText = $(this).html().replace(hashtagRegex, "$1<a href='tag/$2/'>#$2</a>");
+				$(this).html(newText); 
+			})
+		}
+
+		function attachTweet(tweetValue,prepend,retweet){
+			// all values come form rest api
+			var tweetContent = tweetValue.content;
+			var tweetUser = tweetValue.user;
+			var date_display = tweetValue.date_display;
+			var timesince = tweetValue.timesince;
+			// var isRetweet = tweetValue.is_retweet;
+			var tweetFormat;
+			if (retweet && tweetValue.parent){
+				// retweet tweets
+				var mainTweet = tweetValue.parent;
+				tweetFormat = "<div class='media'>  <div class='media-body'> <span class='red-color'>Retweet</span> via <span class='green-color'>" + tweetUser.username+" on "+ date_display+ "</span><br>" + mainTweet.content + "<br> via <a href='"+mainTweet.user.url+"'>" + mainTweet.user.username + "</a> | "+ mainTweet.date_display + " from "+ mainTweet.timesince + " | "+ "<a href='/tweet/"+mainTweet.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " </div></div>" + '<hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">' ;
+			}
+			else{
+				// new tweet
+				tweetFormat = "<div class='media'>  <div class='media-body'> " + tweetContent + "<br> via <a href='"+tweetUser.url+"'>" + tweetUser.username + "</a> | "+ date_display + " from "+ timesince + " | "+ "<a href='/tweet/"+tweetValue.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " </div></div>" + '<hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">' ;	
+			}
+
+			
+
+			if (prepend==true){
+				$("#tweet-container").prepend( //append responsive the text area value
+				tweetFormat
+			)
+			}
+			else{
+				$("#tweet-container").append( //append responsive the text area value
+				tweetFormat
+			)
+			}
+
+
+
+		}
+
+		function parseTweet(){
+			if (tweetList==0){ // if nothing in tweetList stucture
+				$("#tweet-container").text("No post yet");
+			}
+			else{
+				// if there is a tweet in tweetList Structure
+				$.each(tweetList,function(key,value){
+				var tweetKey = key;
+				if (value.parent){
+					attachTweet(value,false,true); //fasle for append 
+				}
+				else{
+				attachTweet(value);
+				}
+				})
+			}
+		}
+
+
+		function fetchTweets(url){
+		console.log("Fetching");
+		var fetchUrl;
+		if (!url){
+			fetchUrl = "/api/tweet/";
+		}
+		else {
+			fetchUrl = url;
+		}
+			$.ajax({
+			url : fetchUrl,
+			method : "GET",
+			data : {"q":query},
+			success: function(data){
+				tweetList=data.results;
+				if (data.next){
+					nextTweetUrl = data.next;
+				}
+				else {
+					$("#loadmore").css('display','none');
+				}
+				parseTweet();
+				updateHashLinks();
+				
+			},
+			error: function(data){
+				console.log("Error");
+				console.log(data);
+				console.log(data.status_code);
+			}
+			})
+	
+		}
+		
+		fetchTweets();
+
+		// $("#laodmore").bind("click",function(event){
+		// 	this is same thing as click function
+		// })
+		$("#loadmore").click(function(event){
+			event.preventDefault();
+			// load more item
+			if (nextTweetUrl){
+				fetchTweets(nextTweetUrl);
+			}
+		})
+
+
+
+
+		var charsStart = 240;
+		var charLeft;
+		$("#tweet-form").append("<span id='tweetCharsLeft'>"+charsStart+"</span>")
+
+		$("#tweet-form textarea").keyup(function(event){ // for restrcition text area
+			var tweetValue = $(this).val();
+			charLeft = charsStart - tweetValue.length;
+			var spanChars = $("#tweetCharsLeft");
+			spanChars.text(charLeft);
+			if (charLeft > 0){
+				spanChars.removeClass('blue-color');
+				spanChars.removeClass('red-color');
+				spanChars.addClass('green-color');
+					
+			}
+			else if (charLeft == 0){
+				spanChars.removeClass('green-color');
+				spanChars.removeClass('red-color');
+				spanChars.addClass('blue-color');
+				
+			}
+			else {
+				spanChars.removeClass('blue-color');
+				spanChars.removeClass('green-color');
+				spanChars.addClass('red-color');
+			}
+
+		})
+
+
+		$("#tweet-form").submit(function(event){ //call for post/submit button
+			event.preventDefault(); // prevent for refresh the page
+			var this_ = $(this); // this is stored the object of event
+			var formData = this_.serialize();
+
+			if (charLeft >= 0){
+
+			this_.find("input[type=text], textarea").val("") // make text area field clear afrer post
+			$.ajax({
+			// url : "{% url 'tweet-api:list' %}",
+			url : "/api/tweet/create/",
+			method : "POST",
+			data : formData,
+			success: function(data){
+				attachTweet(data,true);
+				updateHashLinks();
+				// console.log(data);
+				// fetchTweets(); // refetch the tweet
+				// // tweetList=data;
+				// // parseTweet();
+				
+			},
+			error: function(data){
+				console.log("Error");
+				console.log(data);
+				console.log(data.status_code);
+			}
+			})
+			}
+			else {
+				console.log("POST is to long");
+			}
+
+		})
+
+		});
+	</script>
+{% endblock script %}
+
+{% block content %}
+
+<div class="row">
+	<div class="col-sm-3 col-xs-12" style="background-color:#000;color:#28ff37">
+	<h1 >
+	{{ request.user }}
+	</h1>
+	</div>
+	<div class="col-sm-9">
+	{% if not request.GET.q %}
+		<div class="">
+			{% include "tweets/form.html" with form=create_form action_url=create_url btn_title="POST" from_id="tweet-form" %} 
+			{# create post form form #}
+		</div> <hr>
+	{% endif %}
+
+	<div id="tweet-container">
+		{# displaying data by id with jquery #}
+	</div>
+
+	<a href="#" id='loadmore'>Click here to load more Post</a>
+	{# i have to add load less here#}
+	<div>
+</div>
+{% endblock content %}

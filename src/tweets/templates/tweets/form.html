@@ -1,0 +1,15 @@
+{% load crispy_forms_tags %}
+<form {% if from_id %} id = {{ from_id }} {% endif %} class="form" method="POST" action="{% if action_url %} {{ action_url }} {% endif %}">
+	{% csrf_token %}
+	{# {{ form.as_p }} #}	{# 2nd post form as crispy form #}
+
+	{{ form|crispy }} 
+	<input class="btn btn-warning" type="submit" value="{{ btn_title }}">
+</form>
+
+{# {% load crispy_forms_tags %} #}
+{# <form class='form {% if form_class %}{{ form_class }}{% endif %}' method='POST' action="{% if action_url %}{{ action_url }}{% endif %}"> #}
+   {# {% csrf_token %} #}
+    {# {{ form|crispy }} #}
+    {# <input class='btn btn-primary' type="submit" value="{{ btn_title }}" /> #}
+{# </form> #}
