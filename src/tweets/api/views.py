@@ -24,12 +24,12 @@ class TweetListAPIView(generics.ListAPIView):
 		
 		if requested_user:
 			qs = Tweet.objects.filter(user__username=requested_user).order_by("-timestamp")
+
 		else:
 			im_following = self.request.user.profile.get_following() # none
 			qs1 = Tweet.objects.filter(user__in=im_following)
 			qs2 = Tweet.objects.filter(user=self.request.user)
 			qs = (qs1 | qs2).distinct().order_by("-timestamp")
-		
 		query = self.request.GET.get("q", None)
 		if query is not None:
 			qs = qs.filter( #making queryies q
@@ -37,3 +37,5 @@ class TweetListAPIView(generics.ListAPIView):
 					Q(user__username__icontains=query) #search by user and username
 					)
 		return qs	
+
+
