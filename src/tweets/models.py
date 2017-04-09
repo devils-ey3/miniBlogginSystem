@@ -35,6 +35,15 @@ class TweetManager(models.Manager):
 			)
 		obj.save()
 		return obj
+	def like_toggle(self,user,tweet_obj): # jodi like dewa thake
+		if user in tweet_obj.liked.all():
+			is_liked = False
+			tweet_obj.liked.remove(user)
+		else:
+			is_liked = True
+			tweet_obj.liked.add(user)
+		return is_liked
+
 
 
 class Tweet(models.Model):
@@ -43,6 +52,7 @@ class Tweet(models.Model):
 	content = models.CharField(max_length=240,validators = [validate_content]) # tweet box length
 	updated = models.DateTimeField(auto_now=True) # if update tweet
 	timestamp = models.DateTimeField(auto_now_add=True) # timezone now
+	liked = models.ManyToManyField(settings.AUTH_USER_MODEL,blank=True,related_name='liked')
 
 	objects = TweetManager()
 
