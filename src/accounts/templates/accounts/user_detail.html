@@ -1,4 +1,13 @@
 {% extends "base.html" %}
+
+{% block script %}
+	<script>
+		$(document).ready(function(){
+			loadTweetData("tweet-container");
+		});
+	</script>
+{% endblock script %}
+
 {% block content %}
 <div class="row">
 	{# <div class="col-sm-3 col-xs-12 blue-color" style="background-color:#ebf9e8"> #}
@@ -21,11 +30,13 @@
 	</div>
 	<div class="col-sm-9 col-xs-12">
 	<h1>Tweets</h1>
-	{% for tweet in object.tweet_set.all %}
-		{{tweet}} <br>
-	{% endfor %}
-
-	
+	<div id="tweet-container" data-url="/api/{{object.username}}/tweet/">
+	</div>
+	<a href="#" id="loadmore">Load more tweet</a>
+	{# {% for tweet in object.tweet_set.all %} #}
+		{# {{tweet}} <br> #}
+	{# {% endfor %} #}
+		
 
 	
 	<h1>Following <small>{{object.profile.get_following.count}}</small></h1>

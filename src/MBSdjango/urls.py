@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^tag/(?P<hashtag>.*)/$', HashTagView.as_view(),name='hashtag'),
     url(r'^tweet/', include('tweets.urls', namespace='tweet')),
     url(r'^api/tweet/', include('tweets.api.urls', namespace='tweet-api')),
+    url(r'^api/', include('accounts.api.urls', namespace='profiles-api')),
     url(r'^', include('accounts.urls', namespace='profiles')), # when the regular expression is blank then it takes the last one
     
     
