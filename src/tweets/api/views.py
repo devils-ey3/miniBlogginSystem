@@ -18,18 +18,26 @@ class TweetCreateAPIView(generics.CreateAPIView):
 		serializer.save(user=self.request.user)
 
 class LikeToggleAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, pk, format=None):
-        tweet_qs = Tweet.objects.filter(pk=pk)
-        message = "Not allowed"
-        if request.user.is_authenticated():
-            is_liked = Tweet.objects.like_toggle(request.user, tweet_qs.first())
-            return Response({'liked': is_liked})
-        return Response({"message": message}, status=400)
+	permission_classes = [permissions.IsAuthenticated]
+	def get(self, request, pk, format=None):
+		tweet_qs = Tweet.objects.filter(pk=pk)
+		message = "Not allowed"
+		if request.user.is_authenticated():
+			is_liked = Tweet.objects.like_toggle(request.user, tweet_qs.first())
+			return Response({'liked': is_liked})
+		return Response({"message": message}, status=400)
 
 class TweetListAPIView(generics.ListAPIView):
 	serializer_class = TweetModelSerializer
 	pagination_class = StandardResultsSetPagination
+
+	def get_serializer_context(self):
+		try :
+			context = super(TweetListAPIView, self).get_serializer_context(*args, **kwargs)
+		except:
+			context = super(TweetListAPIView, self).get_serializer_context()
+		context['request'] = self.request
+		return context
 
 	def get_queryset(self, *args, **kwargs):
 		requested_user = self.kwargs.get("username")

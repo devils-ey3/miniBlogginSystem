@@ -84,7 +84,7 @@
         url: likedUrl,
         success: function(data){
           if (data.liked){
-            this_.text("<span class='green-color'>Liked</span>")
+            this_.text("Liked")
           } else {
             this_.text("Unliked")
           }
@@ -103,15 +103,19 @@
       var date_display = tweetValue.date_display;
       var timesince = tweetValue.timesince;
       // var isRetweet = tweetValue.is_retweet;
+      var verb = "Like";
+      if (tweetValue.did_like){
+        verb = "Unlike";
+      }
       var tweetFormat;
       if (retweet && tweetValue.parent){
         // retweet tweets
         var mainTweet = tweetValue.parent;
-        tweetFormat = "<div class='media'>  <div class='media-body'> <span class='red-color'>Retweet</span> via <span class='green-color'>" + tweetUser.username+" on "+ date_display+ "</span><br>" + mainTweet.content + "<br> via <a href='"+mainTweet.user.url+"'>" + mainTweet.user.username + "</a> | "+ mainTweet.date_display + " from "+ mainTweet.timesince + " | "+ "<a href='/tweet/"+mainTweet.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " | "+ "<a href=# class='tweet-like' data-id="+tweetValue.id+">Like</a>" + " </div></div>" + '<hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">' ;
+        tweetFormat = "<div class='media'>  <div class='media-body'> <span class='red-color'>Retweet</span> via <span class='green-color'>" + tweetUser.username+" on "+ date_display+ "</span><br>" + mainTweet.content + "<br> via <a href='"+mainTweet.user.url+"'>" + mainTweet.user.username + "</a> | "+ mainTweet.date_display + " from "+ mainTweet.timesince + " | "+ "<a href='/tweet/"+mainTweet.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " | "+ "<a href=# class='tweet-like' data-id="+tweetValue.id+">"+verb+" ("+tweetValue.likes+")</a>" + " </div></div>" + '<hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">' ;
       }
       else{
         // new tweet
-        tweetFormat = "<div class='media'>  <div class='media-body'> " + tweetContent + "<br> via <a href='"+tweetUser.url+"'>" + tweetUser.username + "</a> | "+ date_display + " from "+ timesince + " | "+ "<a href='/tweet/"+tweetValue.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " | "+ "<a href=# class='tweet-like' data-id="+tweetValue.id+">Like</a>" + " </div></div>" + '<hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">' ; 
+        tweetFormat = "<div class='media'>  <div class='media-body'> " + tweetContent + "<br> via <a href='"+tweetUser.url+"'>" + tweetUser.username + "</a> | "+ date_display + " from "+ timesince + " | "+ "<a href='/tweet/"+tweetValue.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " | "+ "<a href=# class='tweet-like' data-id="+tweetValue.id+">"+verb+" ("+tweetValue.likes+")</a>" + " </div></div>" + '<hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">' ; 
       }
 
       
