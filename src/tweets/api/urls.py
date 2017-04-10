@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from .views import  TweetListAPIView,TweetCreateAPIView,LikeToggleAPIView
+from .views import  TweetListAPIView,TweetCreateAPIView,LikeToggleAPIView,TweetDetailAPIView
 #from .views import tweet_detail_view,tweet_list_view
 #from django.views.generic.base import RedirectView
 
@@ -7,6 +7,7 @@ urlpatterns = [
 #    url(r'^admin/', admin.site.urls),
     # url(r'^$', RedirectView.as_view(url="/")), # redirect to home
     url(r'^$', TweetListAPIView.as_view(),name='list'), # /api/tweet/
+    url(r'^(?P<pk>\d+)/$', TweetDetailAPIView.as_view(),name='detail'), # /api/tweet/create
     url(r'^(?P<pk>\d+)/like/$', LikeToggleAPIView.as_view(),name='like-toggle'), # /api/tweet/create
     url(r'^create/$', TweetCreateAPIView.as_view(),name='create'), # /api/tweet/create
 

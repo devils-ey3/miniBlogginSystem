@@ -26,6 +26,9 @@
       .blue-color{
         color : #0000CD;
       }
+      .yellow-color{
+        color: #ffff00;
+      }
 
 
     </style>
@@ -52,7 +55,7 @@
         return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
 
-  function loadTweetData(tweetContainerID){
+  function loadTweetContainer(tweetContainerID,fetchOneid){
     var query = getParameterByName("q");
     var tweetList = [];
     var nextTweetUrl, previousTweetUrl;
@@ -101,9 +104,22 @@
       if (tweetValue.did_like){
         verb = "Unlike";
       }
+      var retweet;
+      if (tweetValue.parent){
+        tweetValue = tweetValue.parent;
+        retweet = "<span class='red-color'>Retweet</span> via <span class='yellow-color'> " + tweetUser.username+"</span> on <span class='green-color'>"+ date_display+ "</span><br>" + mainTweet.content + "<br> via <a href='"+mainTweet.user.url+"'>" + mainTweet.user.username + "</a> | "+ mainTweet.date_display ;
+      }
+
       var tweetContent = tweetValue.content + "<br> via <a href='"+tweetValue.user.url+"'>" + tweetValue.user.username + "</a> | "+ tweetValue.date_display + " from "+ tweetValue.timesince + " | "+ "<a href='/tweet/"+tweetValue.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " | "+ "<a href=# class='tweet-like' data-id="+tweetValue.id+">"+verb+" ("+tweetValue.likes+")</a>" ;
 
+      if (retweet){
+        var container = "<div class='media'>  <div class='media-body'>"+retweet+tweetContent+"</div></div><hr>";
+      }
+      else{
       var container = "<div class='media'>  <div class='media-body'>"+tweetContent+"</div></div><hr>";
+        
+      }
+
       return container;
 
     }
@@ -119,11 +135,13 @@
       if (tweetValue.did_like){
         verb = "Unlike";
       }
+
+
       var tweetFormat;
       if (retweet && tweetValue.parent){
         // retweet tweets
         var mainTweet = tweetValue.parent;
-        tweetFormat = "<div class='media'>  <div class='media-body'> <span class='red-color'>Retweet</span> via <span class='green-color'>" + tweetUser.username+" on "+ date_display+ "</span><br>" + mainTweet.content + "<br> via <a href='"+mainTweet.user.url+"'>" + mainTweet.user.username + "</a> | "+ mainTweet.date_display + " from "+ mainTweet.timesince + " | "+ "<a href='/tweet/"+mainTweet.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " | "+ "<a href=# class='tweet-like' data-id="+tweetValue.id+">"+verb+" ("+tweetValue.likes+")</a>" + " </div></div>" + '<hr style="border: 0;height: 1px;background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));">' ;
+        tweetFormat = "<div class='media'>  <div class='media-body'> <span class='red-color'>Retweet</span> via <span class='yellow-color'> " + tweetUser.username+"</span> on <span class='green-color'>"+ date_display+ "</span><br>" + mainTweet.content + "<br> via <a href='"+mainTweet.user.url+"'>" + mainTweet.user.username + "</a> | "+ mainTweet.date_display + " from "+ mainTweet.timesince + " | "+ "<a href='/tweet/"+mainTweet.id+"'>View</a>" + " | "+ "<a href='/tweet/"+tweetValue.id+"/retweet/'>Retweet</a>" + " | "+ "<a href=# class='tweet-like' data-id="+tweetValue.id+">"+verb+" ("+tweetValue.likes+")</a>" + " </div></div>" + '<hr>' ;
       }
       else{
         // new tweet
@@ -199,8 +217,42 @@
       })
   
     }
+
+    function fetchSingle(fetchOneid){
+    var fetchDetailUrl = "/api/tweet/"+fetchOneid+"/";
     
+
+      $.ajax({
+      url : fetchDetailUrl,
+      method : "GET",
+      success: function(data){
+        console.log("fetcjing");
+        tweetList=[data];
+        // if (data.next){
+        //   nextTweetUrl = data.next;
+        // }
+        // else {
+        //   $("#loadmore").css('display','none');
+        // }
+        parseTweet();
+        updateHashLinks();
+        
+      },
+      error: function(data){
+        console.log("Error");
+        console.log(data);
+        console.log(data.status_code);
+      }
+      })
+  
+    }
+
+    if (fetchOneid){
+    fetchSingle(fetchOneid);
+    }
+    else{
     fetchTweets();
+    }
 
     // $("#laodmore").bind("click",function(event){
     //  this is same thing as click function

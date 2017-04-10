@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .pagination import StandardResultsSetPagination
-from .serializer import TweetModelSerializer
+from .serializers import TweetModelSerializer
 from tweets.models import Tweet
 from django.db.models import Q
 
@@ -13,9 +13,23 @@ class TweetCreateAPIView(generics.CreateAPIView):
 	serializer_class = TweetModelSerializer
 	permissions_classes = [permissions.IsAuthenticated]
 
-
 	def perform_create(self, serializer):
 		serializer.save(user=self.request.user)
+
+class TweetDetailAPIView(generics.RetrieveAPIView):
+	queryset = Tweet.objects.all()
+	serializer_class = TweetModelSerializer
+	permissions_classes = [permissions.AllowAny]
+	pagination_class = StandardResultsSetPagination
+	def get_queryset(self, *args, **kwargs):
+		tweet_id = self.kwargs.get("pk")
+		qs = Tweet.objects.filter(pk=tweet_id)
+		return qs
+		if qs.exists() and qs.count() == 1:
+			parent_obj = qs.first()
+			qs1 = parent_obj.get_children()
+			qs = (qs | qs1).distinct().extra(select={"parent_id_null": 'parent_id IS NULL'})
+		return qs.order_by("-parent_id_null", '-timestamp')	
 
 class LikeToggleAPIView(APIView):
 	permission_classes = [permissions.IsAuthenticated]

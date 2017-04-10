@@ -1,12 +1,14 @@
 from django.utils.timesince import timesince
 from rest_framework import serializers
-from accounts.api.serializer import UserDisplaySerializer
+from accounts.api.serializers import UserDisplaySerializer
 from tweets.models import Tweet
 
 class ParentTweetModelSerializer(serializers.ModelSerializer):
 	user = UserDisplaySerializer(read_only=True) # Generally it is write only mode (POST method), the read_only mode is send request as GET method
 	date_display = serializers.SerializerMethodField()
 	timesince = serializers.SerializerMethodField()
+	likes = serializers.SerializerMethodField()
+	did_like = serializers.SerializerMethodField()
 
 	class Meta:
 		model = Tweet
@@ -18,7 +20,20 @@ class ParentTweetModelSerializer(serializers.ModelSerializer):
 			'timestamp', #from newsest post first and oldest post last
 			'date_display',
 			'timesince',
+			'likes', # tweetvalue.likes
+			'did_like'
 		]
+
+	def get_likes(self,obj):
+		return obj.liked.all().count()
+
+	def get_did_like(self,obj):
+		request = self.context.get("request")
+		user = request.user
+		if user.is_authenticated():
+			if user in obj.liked.all():
+				return True
+		return False
 
 	def get_is_retweet(self,obj): # for preventing retweet of retwwet post
 		if obj.parent:
