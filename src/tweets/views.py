@@ -75,7 +75,7 @@ class TweetDeleteView(LoginRequiredMixin,DeleteView):
 	template_name = "tweets/delete_confirm.html"
 	success_url = reverse_lazy("tweet:list")
 
-class TweetListView(ListView):
+class TweetListView(LoginRequiredMixin,ListView):
 	#template_name = "tweets/list_view.html" # template_name variable name is fixed
 	# If you want ot ignore template_name then create same html file into app name template folder
 
