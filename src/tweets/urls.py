@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url,include
 from .views import  TweetDetailView , TweetListView, TweetCreateView, TweetUpdateView , TweetDeleteView, RetweetView
 #from .views import tweet_detail_view,tweet_list_view
 from django.views.generic.base import RedirectView
@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^(?P<pk>\d+)/retweet/$', RetweetView.as_view(),name='retweet'), # /tweet/1/retweet/ 
     url(r'^(?P<pk>\d+)/update/$', TweetUpdateView.as_view(),name='update'), #/tweet/1/update
     url(r'^(?P<pk>\d+)/delete/$', TweetDeleteView.as_view(),name='delete'), #/tweet/1/delete
+
 
 ]

@@ -57,6 +57,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'MBSdjango.urls'
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/'
 
 TEMPLATES = [
     {
